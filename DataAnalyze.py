@@ -6,7 +6,7 @@ import csv
 import datetime
 
 keywords = []
-websites =[]
+websites = []
 
 class RankData(object):
     """Docstring for RankData. """
@@ -18,6 +18,7 @@ class RankData(object):
 
     def getRanks(self):
         for i in keywords:
+            print('processing keyword [{0}] [{1}]'.format(keywords.index(i), i))
             x = Rank(i)
             self.rawRank[i] = x.getRank(30)
 
@@ -75,8 +76,9 @@ class RankData(object):
                     if i.find(site) >= 0:
                         break
                 a.append(20 if rank > 20 else rank)
-            a.append(sum(a[1:])/len(a[1:]))#calculate average rank
-            average.append(sum(a[1:])/len(a[1:]))
+            ave = round(sum(a[1:])/len(a[1:]), 2)#calculate average rank
+            a.append(ave)#calculate average rank
+            average.append(ave)
             self.websitesRankXLSX.append(a)
 
         # order by average
