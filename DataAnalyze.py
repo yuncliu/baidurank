@@ -132,7 +132,10 @@ class RankData(object):
 
         worksheet.merge_range('A1:U1', '百度快照排名统计表', title_format)
         worksheet.set_row(0, 30)
-        worksheet.merge_range('A2:U2', datetime.datetime.now().strftime('统计日期：%Y年%m月%d日%H:%M'),
+        nowtime = datetime.datetime.now()
+        worksheet.merge_range('A2:U2',
+                '统计日期：{0}年{1}月{2}日{3}:{4}'.format(nowtime.year, nowtime.month,
+                    nowtime.day, nowtime.hour, nowtime.minute),
                 second_row_format)
         worksheet.set_row(1, 20)
         worksheet.set_row(2, 20)
