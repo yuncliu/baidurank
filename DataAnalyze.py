@@ -5,8 +5,8 @@ import xlsxwriter
 import csv
 import datetime
 
-keywords = ['nokia', 'python']
-websites =['nokia', 'ifanr', '2cto']
+keywords = []
+websites =[]
 
 class RankData(object):
     """Docstring for RankData. """
@@ -19,7 +19,7 @@ class RankData(object):
     def getRanks(self):
         for i in keywords:
             x = Rank(i)
-            self.rawRank[i] = x.getRank()
+            self.rawRank[i] = x.getRank(30)
 
         self.countWebsitesCSV()
         self.countWebsitesXLSX()
@@ -40,11 +40,11 @@ class RankData(object):
         for site in websites:
             a={'Name': site}
             for kw in self.rawRank.keys():
-                rank = 20
+                rank = 21
                 for i in range(len(self.rawRank[kw])):
                     if self.rawRank[kw][i].find(site) >= 0:
                         rank = i + 1
-                a[kw] = rank
+                a[kw] = 20 if rank > 20 else rank
             self.websitesRankCSV[site] = a
 
     def dumpWebstitesStasticsToCSV(self, filename):
@@ -62,31 +62,33 @@ class RankData(object):
         """keywords title"""
         t = ['']
         [t.append(i) for i in keywords]
-        t.append('average')
-        t.append('rank')
+        t.append('平均值')
+        t.append('综合排名')
         self.websitesRankXLSX.append(t)
         average = []
         for site in websites:
             a = [site]
             for kw in keywords:
-                rank = 20
-                for i in range(len(self.rawRank[kw])):
-                    if self.rawRank[kw][i].find(site) >= 0:
-                        rank = i + 1
-                a.append(rank)
-            a.append(sum(a[1:])/len(a[1:]))#calculage average rank
+                rank = 0
+                for i in self.rawRank[kw]:#i is website address
+                    rank = rank + 1
+                    if i.find(site) >= 0:
+                        break
+                a.append(20 if rank > 20 else rank)
+            a.append(sum(a[1:])/len(a[1:]))#calculate average rank
             average.append(sum(a[1:])/len(a[1:]))
             self.websitesRankXLSX.append(a)
-        average.sort()
-        averagedict = {}
-        for i in range(len(average)):
-            averagedict[average[i]] = i + 1
 
+        # order by average
+        average.sort()
         for l in self.websitesRankXLSX:
             last = l[len(l)-1]
             if isinstance(last, str):
                 continue
-            l.append(averagedict[last])
+            try:
+                l.append(average.index(last) + 1)
+            except ValueError as e:
+                print(e)
 
 
     def dumpWebstitesStasticsToXLSX(self, filename):
@@ -113,10 +115,20 @@ class RankData(object):
             'align':   'vcenter',
             'text_wrap':True,
         })
-        c_format = workbook.add_format()
+        c_format = workbook.add_format({
+            'text_wrap':True,
+        })
         c_format.set_align('center')
         c_format.set_align('vcenter')
         c_format.set_border(1)
+
+        c_red_format = workbook.add_format({
+            'text_wrap':True,
+            'font_color':'red',
+        })
+        c_red_format.set_align('center')
+        c_red_format.set_align('vcenter')
+        c_red_format.set_border(1)
 
         worksheet.merge_range('A1:U1', '百度快照排名统计表', title_format)
         worksheet.set_row(0, 30)
@@ -136,21 +148,24 @@ class RankData(object):
 
         for row in range(len(self.websitesRankXLSX)):
             r = self.websitesRankXLSX[row]
+            last_col = len(r) - 1
             for col in range(len(r)):
                 if row == 0 and col == 0:
                     worksheet.write(row + 3, col, r[col], x_format)
-                    worksheet.set_row(row + 3, 30)
                 else:
                     worksheet.set_row(row + 3, 20)
                     if col == 0:
                         #worksheet.write(row + 3, col + 1, r[col])
                         worksheet.merge_range(row + 3, col, row + 3, col + 1, r[col], c_format)
+                    if col == last_col:
+                        worksheet.write(row + 3, col + 1, r[col], c_red_format)
                     else:
                         worksheet.write(row + 3, col + 1, r[col], c_format)
 
-                    if r[col] =='average' or r[col] == 'rank':
+                    if r[col] =='平均值' or r[col] == '综合排名':
                         worksheet.merge_range(row + 3, col + 1, row + 2, col + 1, r[col], c_format)
 
+        worksheet.set_row(3, 40)
         last_row = len(self.websitesRankXLSX) + 5
         worksheet.merge_range('A{0}:U{0}'.format(last_row), '注：此数据统计出现在百度快照头两页的排名按实际排名计入，出现在第三页之后的排名均按排名20位计入。')
 
