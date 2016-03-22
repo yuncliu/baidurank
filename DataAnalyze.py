@@ -156,12 +156,7 @@ class RankData(object):
 
         workbook.close()
 
-def main():
+if __name__ == "__main__":
     a = RankData()
     a.getRanks()
-    a.dumpToFile('r.csv')
-    a.dumpWebstitesStasticsToCSV('w.csv')
     a.dumpWebstitesStasticsToXLSX('w.xlsx')
-
-if __name__ == "__main__":
-    main()
