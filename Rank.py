@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import requests
 from html.parser import HTMLParser
 
@@ -109,7 +111,6 @@ class Rank(object):
             htmltext = self.gethtml(next_url)
             [rank.append(i) for i in getranklist(htmltext)]
             next_url = get_next_page_url(htmltext)
-            print(next_url)
             if next_url is None:
                 print('next url is None')
                 break
