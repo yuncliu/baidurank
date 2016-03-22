@@ -7,7 +7,6 @@ import datetime
 
 keywords = []
 websites = []
-
 class RankData(object):
     """Docstring for RankData. """
     def __init__(self):
@@ -93,7 +92,12 @@ class RankData(object):
                 print(e)
 
 
-    def dumpWebstitesStasticsToXLSX(self, filename):
+    def dumpWebstitesStasticsToXLSX(self, filename = None):
+        nowtime = datetime.datetime.now()
+        if filename is None:
+            filename = '{0}年{1}月{2}日{3}_{4}.xlsx'.format(nowtime.year, nowtime.month,
+                    nowtime.day, nowtime.hour, nowtime.minute)
+
         workbook = xlsxwriter.Workbook(filename)
         worksheet = workbook.add_worksheet()
 
@@ -102,13 +106,13 @@ class RankData(object):
             'align':    'center',
             'valign':   'vcenter',
             'font_size': 20,
-        })
+            })
 
         second_row_format = workbook.add_format({
             'bold':     False,
             'align':    'left',
             'valign':   'vbottom',
-        })
+            })
         x_format = workbook.add_format({
             'bold':     False,
             'border':   1,
@@ -116,10 +120,10 @@ class RankData(object):
             'align':    'center',
             'align':   'vcenter',
             'text_wrap':True,
-        })
+            })
         c_format = workbook.add_format({
             'text_wrap':True,
-        })
+            })
         c_format.set_align('center')
         c_format.set_align('vcenter')
         c_format.set_border(1)
@@ -127,14 +131,13 @@ class RankData(object):
         c_red_format = workbook.add_format({
             'text_wrap':True,
             'font_color':'red',
-        })
+            })
         c_red_format.set_align('center')
         c_red_format.set_align('vcenter')
         c_red_format.set_border(1)
 
         worksheet.merge_range('A1:U1', '百度快照排名统计表', title_format)
         worksheet.set_row(0, 30)
-        nowtime = datetime.datetime.now()
         worksheet.merge_range('A2:U2',
                 '统计日期：{0}年{1}月{2}日{3}:{4}'.format(nowtime.year, nowtime.month,
                     nowtime.day, nowtime.hour, nowtime.minute),
@@ -179,4 +182,4 @@ class RankData(object):
 if __name__ == "__main__":
     a = RankData()
     a.getRanks()
-    a.dumpWebstitesStasticsToXLSX('w.xlsx')
+    a.dumpWebstitesStasticsToXLSX()
